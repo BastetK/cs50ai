@@ -157,6 +157,9 @@ class MinesweeperAI():
         # List of sentences about the game known to be true
         self.knowledge = []
 
+        # Set of all cells
+        self.all_cells = set([p for p in itertools.product(range(self.height), repeat=2)])
+
     def find_neighbours(self, cell):
         #returns a set of surrounding cells        
         neighbour_cells = set()
@@ -204,8 +207,10 @@ class MinesweeperAI():
         self.moves_made.add(cell)
         self.mark_safe(cell)
         neighbours = self.find_neighbours(cell) 
-        self.knowledge.append(Sentence((neighbours - self.mines - self.safes), count - len(self.mines & neighbours)))
-        print(self.knowledge[-1])
+        new_sentense = Sentence((neighbours - self.mines - self.safes), count - len(self.mines & neighbours))
+        if (new_sentense not in self.knowledge):
+            self.knowledge.append(new_sentense)
+            print(f"last added knowledge {sorted(self.knowledge[-1].cells)} and count = {self.knowledge[-1].count}, now has {len(self.knowledge)} knowledge")
         for s in self.knowledge:
             km = s.known_mines().copy()
             #print(f"km - {km}")
@@ -215,12 +220,17 @@ class MinesweeperAI():
                 self.mark_mine(mine) 
             for safe in ks:
                 self.mark_safe(safe)
-            if(not km or not ks):
+            if(not s.cells):
                 self.knowledge.remove(s)
+                print(f"removed an empty rule {s}, leaved {len(self.knowledge)}")
             for s_sub in self.knowledge:
-                if (s!=s_sub and s_sub.cells.issubset(s.cells)):
-                    self.knowledge.append(Sentence(s.cells - s_sub.cells, s.count - s_sub.count))
-        print(f"mines {self.mines}")
+                if (s_sub.cells and s!=s_sub and s_sub.cells.issubset(s.cells)):
+                    print(f"adding {s.cells} - {s_sub.cells} count = {s.count} - {s_sub.count}")
+                    new_sentense = Sentence(s.cells - s_sub.cells, s.count - s_sub.count)   
+                    print(new_sentense)
+                    if (new_sentense not in self.knowledge):
+                        self.knowledge.append(new_sentense)
+        print(f"mines {sorted(self.mines)}")
 
     def make_safe_move(self):
         """
@@ -232,7 +242,7 @@ class MinesweeperAI():
         and self.moves_made, but should not modify any of those values.
         """
         #print(self.safes - self.moves_made)
-        print(self.mines)
+        print(sorted(self.mines))
         possible_safe_moves = self.safes - self.moves_made
         if not (possible_safe_moves):
             return None
@@ -247,12 +257,19 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        all_cells = set()        
+
+        '''all_cells = set()        
         for i in range(self.height):
             for j in range(self.width):
                 all_cells.add((i,j))
-        possible_cells = (all_cells - self.mines - self.moves_made)
-        p = possible_cells.pop() if possible_cells else print('No more possible moves')
+        print(list(itertools.combinations(range(self.height), 2)))
+        cells = [p for p in itertools.product(range(self.height), repeat=2)]
+        print(f"product length {len(cells)}")
+        print(f'all cells with {len(all_cells)} count {sorted(all_cells)}')'''
+
+        possible_cells = (self.all_cells - self.mines - self.moves_made)
+        p = random.choice(tuple(possible_cells)) if possible_cells else print('No more possible moves')
+        #p = possible_cells.pop() if possible_cells else print('No more possible moves')
         print(f"randome move {p}")
         return p 
         #return possible_cells.pop() if possible_cells else print('No more possible moves')
