@@ -2,6 +2,7 @@ import os
 import random
 import re
 import sys
+import numpy
 
 DAMPING = 0.85
 SAMPLES = 10000
@@ -79,7 +80,17 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    rank = dict([(k, 0) for k in [*corpus]])
+    print ([*corpus])
+    sample = numpy.random.choice([*corpus])
+    for i in range(n):
+        rank[sample] += 1
+        print(f"{i} - {sample} tmodel {transition_model(corpus, sample, damping_factor)}")
+        sample = numpy.random.choice([*corpus], p=list(transition_model(corpus, sample, damping_factor).values()))
+    for k in [*rank]:
+        rank[k] /= n
+    print(rank)
+    return rank
 
 
 def iterate_pagerank(corpus, damping_factor):
