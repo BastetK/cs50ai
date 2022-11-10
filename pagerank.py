@@ -12,7 +12,6 @@ def main():
     if len(sys.argv) != 2:
         sys.exit("Usage: python pagerank.py corpus")
     corpus = crawl(sys.argv[1])
-    #print(transition_model({"1.html": {"2.html", "3.html"}, "2.html": {"3.html"}, "3.html": set()}, "3.html", 0.85))
     ranks = sample_pagerank(corpus, DAMPING, SAMPLES)
     print(f"PageRank Results from Sampling (n = {SAMPLES})")
     for page in sorted(ranks):
@@ -80,16 +79,16 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    rank = dict([(k, 0) for k in [*corpus]])
-    print ([*corpus])
+    rank = dict([(k, 0) for k in corpus])
+    #print ([*corpus])
     sample = numpy.random.choice([*corpus])
     for i in range(n):
         rank[sample] += 1
-        print(f"{i} - {sample} tmodel {transition_model(corpus, sample, damping_factor)}")
+        #print(f"{i} - {sample} tmodel {transition_model(corpus, sample, damping_factor)}")
         sample = numpy.random.choice([*corpus], p=list(transition_model(corpus, sample, damping_factor).values()))
     for k in [*rank]:
         rank[k] /= n
-    print(rank)
+    #print(rank)
     return rank
 
 
@@ -102,7 +101,22 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    rank = dict([(k, 1/len(corpus)) for k in corpus])
+    return calc_new_rank(corpus, damping_factor, rank)
+
+def calc_new_rank(corpus, damping_factor, prev_rank):
+    new_rank = dict([(k, (1 - damping_factor) / len(corpus)) for k in corpus])
+    for k, v in corpus.items():
+        if(v):
+            for page in v:
+                new_rank[page] += damping_factor * prev_rank[k] / len(corpus[k])
+        else:
+            for page in corpus:
+                new_rank[page] += damping_factor * prev_rank[k] / len(corpus)
+    if(all(abs(r) < 0.001 for r in numpy.subtract(list(prev_rank.values()), list(new_rank.values())))):
+        return new_rank
+    else:
+        return calc_new_rank(corpus, damping_factor, new_rank)
 
 
 if __name__ == "__main__":
