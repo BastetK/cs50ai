@@ -157,18 +157,13 @@ def joint_probability(people, one_gene, two_genes, have_trait):
             gene_father = number_of_genes(person["father"], one_gene, two_genes)
             prob_mother = PARENT_PROBS[gene_mother]
             prob_father = PARENT_PROBS[gene_father]
-            #prob_father = 0.5 if person["father"] in one_gene else 1 - PROBS["mutation"] if person["father"] in two_genes else PROBS["mutation"]
             prob_from_parents = {
                 0: (1 - prob_mother) * (1 - prob_father),
                 1: prob_mother * (1 - prob_father) + prob_father * (1 - prob_mother),
                 2: prob_mother * prob_father
             }
             joint_probs.append(prob_from_parents[gene] * PROBS["trait"][gene][trait])   
-    print(joint_probs)
     return np.prod(joint_probs)
-
-#def get_parent_prob(gene):
-    #return (0.5 * (1 - PROBS["mutation"])) + (0.5 * PROBS["mutation"]) if gene == 1 else 1 - PROBS["mutation"] if gene == 2 else PROBS["mutation"] 
 
 def number_of_genes(name, one_gene, two_genes):
     return 1 if name in one_gene else 2 if name in two_genes else 0
@@ -181,14 +176,10 @@ def update(probabilities, one_gene, two_genes, have_trait, p):
     the person is in `have_gene` and `have_trait`, respectively.
     """
     for person in probabilities:
-        print(person)
         gene = number_of_genes(person, one_gene, two_genes)
         trait = person in have_trait
         probabilities[person]["gene"][gene] += p
         probabilities[person]["trait"][trait] += p
-    print(probabilities)
-
-
 
 def normalize(probabilities):
     """
@@ -198,14 +189,8 @@ def normalize(probabilities):
     alpha = 0
     for person, prob in probabilities.items():
         alpha = 1/sum(prob["gene"].values())
-        #print(alpha)
         prob["gene"].update((k, v * alpha) for k, v in prob["gene"].items())
         prob["trait"].update((k, v * alpha) for k, v in prob["trait"].items())
-     #   for g in probabilities[p]["gene"]:
-        #    probabilities[p]["gene"][g] *= alpha
-      #  for t in probabilities[p]["trait"]:
-       #     probabilities[p]["trait"][t] *= alpha
-
 
 if __name__ == "__main__":
     main()
