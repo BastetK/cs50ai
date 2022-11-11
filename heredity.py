@@ -153,11 +153,17 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         if(not(person["mother"] and person["father"])):
             joint_probs.append(PROBS["gene"][gene] * PROBS["trait"][gene][trait])
         else:
-            gene_f = 
-            gene_m = 
-            prob_m_gives = 0.5 if person["mother"] in one_gene else 1 - PROBS["mutation"] if person["mother"] in two_genes else PROBS["mutation"]
-            prob_f_gives = 0.5 if person["father"] in one_gene else 1 - PROBS["mutation"] if person["father"] in two_genes else PROBS["mutation"]
-            joint_probs.append((prob_m_gives) * PROBS["trait"][gene][trait])   
+            gene_mother = number_of_genes(person["mother"], one_gene, two_genes)
+            gene_father = number_of_genes(person["father"], one_gene, two_genes)
+            prob_mother = PARENT_PROBS[gene_mother]
+            prob_father = PARENT_PROBS[gene_father]
+            #prob_father = 0.5 if person["father"] in one_gene else 1 - PROBS["mutation"] if person["father"] in two_genes else PROBS["mutation"]
+            prob_from_parents = {
+                0: (1 - prob_mother) * (1 - prob_father),
+                1: prob_mother * (1 - prob_father) + prob_father * (1 - prob_mother),
+                2: prob_mother * prob_father
+            }
+            joint_probs.append(prob_from_parents[gene] * PROBS["trait"][gene][trait])   
     return np.prod(joint_probs)
 
 #def get_parent_prob(gene):
