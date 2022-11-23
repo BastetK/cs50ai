@@ -126,6 +126,14 @@ class CrosswordCreator():
                     revised = True
         return revised
 
+    def get_arcs(self):
+
+        arcs = []
+        for x in self.domains:
+            for y in self.crossword.neighbors(x):
+                arcs.append((x, y))
+        return arcs
+
     def ac3(self, arcs=None):
         """
         Update `self.domains` such that each variable is arc consistent.
@@ -135,21 +143,37 @@ class CrosswordCreator():
         Return True if arc consistency is enforced and no domains are empty;
         return False if one or more domains end up empty.
         """
-        raise NotImplementedError
+        queue = arcs.copy() if arcs else self.get_arcs()
+        while (queue):
+            (x, y) = queue.pop(0)
+            if self.revise(x, y):
+                if len(self.domains[x]) == 0:
+                    return False
+                for z in self.crossword.neighbors(x):
+                    if z != y:
+                        queue.append(z, x)
+        return True
 
     def assignment_complete(self, assignment):
         """
         Return True if `assignment` is complete (i.e., assigns a value to each
         crossword variable); return False otherwise.
         """
-        raise NotImplementedError
+        for word in assignment.values():
+            if (not word):
+                return False
+        return True
 
     def consistent(self, assignment):
         """
         Return True if `assignment` is consistent (i.e., words fit in crossword
         puzzle without conflicting characters); return False otherwise.
         """
-        raise NotImplementedError
+        for v, word in assignment.items():
+            if (word):
+                if (v.legth != len(word)):
+                    return False
+        return True
 
     def order_domain_values(self, var, assignment):
         """
