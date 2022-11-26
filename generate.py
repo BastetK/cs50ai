@@ -205,9 +205,12 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        #TODO
-        return self.domains[var]
-
+        print(self.domains[var])
+        values = sorted(self.domains[var], key=lambda value: len([v for v in self.crossword.neighbors(var) if v not in assignment.keys() and value in self.domains[v]]))
+        print(values)
+        print(values == list(self.domains[var]))
+        return values
+        
     def select_unassigned_variable(self, assignment):
         """
         Return an unassigned variable not already part of `assignment`.
@@ -216,8 +219,6 @@ class CrosswordCreator():
         degree. If there is a tie, any of the tied variables are acceptable
         return values.
         """
-        #TODO
-        print(self.domains)
         #self.domains = dict(sorted(self.domains.items(), key=lambda item: len(item[1])))
         min_v = min([len(v) for k,v in self.domains.items() if k not in assignment.keys()])
         print(min_v)
