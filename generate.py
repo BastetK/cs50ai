@@ -100,12 +100,9 @@ class CrosswordCreator():
          constraints; in this case, the length of the word.)
         """
         for v in self.domains:
-            #print(v)
-            #print(self.domains[v])
             for word in self.domains[v].copy():
                 if (len(word) != v.length):
                     self.domains[v].remove(word)
-            #print(self.domains[v])
 
     def revise(self, x, y):
         """
@@ -118,7 +115,6 @@ class CrosswordCreator():
         """
         revised = False
         overlap = self.crossword.overlaps[x, y]
-        print(f"overlap {overlap}")
         if(overlap):
             for word in self.domains[x].copy():
                 if(word[overlap[0]]) not in [word_y[overlap[1]] for word_y in self.domains[y]]:
@@ -147,21 +143,12 @@ class CrosswordCreator():
         queue = arcs.copy() if arcs else self.get_arcs()
         while (queue):
             (x, y) = queue.pop(0)
-            print(f"x - {x}, y - {y}")
-            print(f"domain x")
-            print(print(self.domains[x]))
-            print(f"domain y")
-            print(print(self.domains[y]))
             if self.revise(x, y):
                 if len(self.domains[x]) == 0:
                     return False
                 for z in self.crossword.neighbors(x):
                     if z != y:
                         queue.append((z, x))
-                print(f"new domain x {print(self.domains[x])}")
-                print(f"new domain y {print(self.domains[y])}")
-                for q in queue:
-                    print(f"queue {q} --- end queue")
         return True
 
     def assignment_complete(self, assignment):
@@ -180,11 +167,7 @@ class CrosswordCreator():
         """
         #all words are different
         filled_words = dict(filter(lambda item: item[1] != "", assignment.items()))
-        print(filled_words)
         if len(filled_words.values()) != len(set(filled_words.values())):
-            print("Duplicate values")
-            print(filled_words.values())
-            print(set(filled_words.values()))
             return False
 
         for x, word in filled_words.items():
@@ -205,10 +188,7 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        print(self.domains[var])
         values = sorted(self.domains[var], key=lambda value: len([v for v in self.crossword.neighbors(var) if v not in assignment.keys() and value in self.domains[v]]))
-        print(values)
-        print(values == list(self.domains[var]))
         return values
         
     def select_unassigned_variable(self, assignment):
@@ -221,9 +201,7 @@ class CrosswordCreator():
         """
         #self.domains = dict(sorted(self.domains.items(), key=lambda item: len(item[1])))
         min_v = min([len(v) for k,v in self.domains.items() if k not in assignment.keys()])
-        print(min_v)
         vals = [v for v in self.crossword.variables if v not in assignment.keys() and len(self.domains[v])==min_v]
-        print(f"min values {len(vals)}")
         if(len(vals)!=1):
             degrees = {v:len(self.crossword.neighbors(v)) for v in vals}
             return max(degrees, key=degrees.get)
@@ -238,7 +216,6 @@ class CrosswordCreator():
 
         If no assignment is possible, return None.
         """
-        print(assignment)
         if self.assignment_complete(assignment):
             return assignment 
         var = self.select_unassigned_variable(assignment)
