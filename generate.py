@@ -148,8 +148,10 @@ class CrosswordCreator():
         while (queue):
             (x, y) = queue.pop(0)
             print(f"x - {x}, y - {y}")
-            print(f"domain x {print(self.domains[x])}")
-            print(f"domain y {print(self.domains[y])}")
+            print(f"domain x")
+            print(print(self.domains[x]))
+            print(f"domain y")
+            print(print(self.domains[y]))
             if self.revise(x, y):
                 if len(self.domains[x]) == 0:
                     return False
@@ -177,17 +179,22 @@ class CrosswordCreator():
         puzzle without conflicting characters); return False otherwise.
         """
         #all words are different
-        if len(assignment.values()) != len(set(assignment.values())):
+        filled_words = dict(filter(lambda item: item[1] != "", assignment.items()))
+        print(filled_words)
+        if len(filled_words.values()) != len(set(filled_words.values())):
+            print("Duplicate values")
+            print(filled_words.values())
+            print(set(filled_words.values()))
             return False
 
-        for x, word in assignment.items():
+        for x, word in filled_words.items():
             if (x.length != len(word)):
                 return False
 
             for y in self.crossword.neighbors(x):
-                if (y in assignment.keys()):
+                if (y in filled_words.keys()):
                     i, j = self.crossword.overlaps[x, y]
-                    if (word[i] != assignment[y][j]):
+                    if (word[i] != filled_words[y][j]):
                         return False
         return True
 
@@ -210,9 +217,16 @@ class CrosswordCreator():
         return values.
         """
         #TODO
-        
-        print(f"ass val {self.crossword.variables}")
-        return [v for v in self.crossword.variables if v not in assignment.keys()].pop()
+        print(self.domains)
+        #self.domains = dict(sorted(self.domains.items(), key=lambda item: len(item[1])))
+        min_v = min([len(v) for k,v in self.domains.items() if k not in assignment.keys()])
+        print(min_v)
+        vals = [v for v in self.crossword.variables if v not in assignment.keys() and len(self.domains[v])==min_v]
+        print(f"min values {len(vals)}")
+        if(len(vals)!=1):
+            degrees = {v:len(self.crossword.neighbors(v)) for v in vals}
+            return max(degrees, key=degrees.get)
+        return vals.pop()
 
     def backtrack(self, assignment):
         """
@@ -228,12 +242,12 @@ class CrosswordCreator():
             return assignment 
         var = self.select_unassigned_variable(assignment)
         for v in self.order_domain_values(var, assignment):
+            assignment[var] = v
             if self.consistent(assignment):
-                assignment[var] = v
                 result = self.backtrack(assignment)
                 if (result):
                     return result
-            assignment[var] = ""
+            del assignment[var]
         return None
 
 
