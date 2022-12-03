@@ -64,7 +64,6 @@ def load_data(filename):
     evidence, labels = [], []
     with open(filename, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
-        print("here")
         for row in reader:
             evidence.append([
                 int(row['Administrative']),
@@ -86,7 +85,6 @@ def load_data(filename):
                 1 if row['Weekend']=="TRUE" else 0 
                 ])
             labels.append(1 if row['Revenue']=="TRUE" else 0)
-    print(evidence)
     return (evidence, labels)
 
 
@@ -115,7 +113,16 @@ def evaluate(labels, predictions):
     representing the "true negative rate": the proportion of
     actual negative labels that were accurately identified.
     """
-    raise NotImplementedError
+    t_positive, t_negative, positive, negative = 0, 0, 0, 0
+    for actual, predicted in zip(labels, predictions):
+        if actual == 1:
+            positive += 1
+            if actual == predicted: t_positive += 1 
+        else:
+            negative += 1
+            if actual == predicted: t_negative += 1
+    
+    return (t_positive/positive, t_negative/negative)
 
 
 if __name__ == "__main__":
