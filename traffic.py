@@ -60,8 +60,8 @@ def load_data(data_dir):
     """
 
     images, labels = [], []
-    #for category in range(0, NUM_CATEGORIES):
-    for category in range(0, 3):
+    for category in range(0, NUM_CATEGORIES):
+    #for category in range(0, 3):
         path = os.path.join(data_dir, str(category))
         for file in os.listdir(path):
         #for file in sorted(os.listdir(path)):
@@ -72,6 +72,7 @@ def load_data(data_dir):
             #print((img.shape))
             images.append(img)
             labels.append(category)
+    print(f"Loaded {len(labels)} samples")
     return (images, labels)
 
 
@@ -81,7 +82,32 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
-    raise NotImplementedError
+    
+    model = tf.keras.models.Sequential([tf.keras.layers.Conv2D(
+        32, (2, 2), activation="sigmoid", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+    ),
+    tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
+    tf.keras.layers.Conv2D(
+        32, (2, 2), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+    ),
+    tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
+    tf.keras.layers.Flatten(),
+
+    tf.keras.layers.Dense(2*NUM_CATEGORIES, activation="sigmoid"),
+    tf.keras.layers.Dropout(0.1),
+
+    tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax")
+])
+
+    model.compile(
+    optimizer="adam",
+    loss="categorical_crossentropy",
+    metrics=["accuracy"]
+    )
+
+    return model 
 
 
 if __name__ == "__main__":
