@@ -66,9 +66,9 @@ def tokenize(document):
     Process document by coverting all words to lowercase, and removing any
     punctuation or English stopwords.
     """
-    words = nltk.tokenize.word_tokenize(document.lower())
+    words = nltk.tokenize.word_tokenize(document)
+    words = [w.lower() for w in words]
     words = [word for word in words if word not in string.punctuation and word not in nltk.corpus.stopwords.words("english")]
-    words.sort()
     return words
 
 
